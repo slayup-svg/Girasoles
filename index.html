@@ -25,71 +25,58 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-function petalo(x,y,r,angle,color){
+let petalos = [];
+let centroListo = false;
+
+function crearPetalos(x,y,scale){
+    const colores=["#FFD84D","#FFC300","#FFDB58","#F4C430"];
+    for(let i=0;i<40;i++){
+        petalos.push({
+            x:x,
+            y:y,
+            r:60*scale,
+            ang:i*(Math.PI*2/40),
+            color:colores[Math.floor(Math.random()*colores.length)]
+        });
+    }
+}
+
+function dibujarPetalo(p){
     ctx.save();
-    ctx.translate(x,y);
-    ctx.rotate(angle);
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.ang);
     ctx.beginPath();
     ctx.moveTo(0,0);
-    ctx.bezierCurveTo(r,-r,r*2,r,r*0.2,r*2);
-    ctx.bezierCurveTo(-r*2,r,-r,-r,0,0);
-    ctx.fillStyle = color;
+    ctx.bezierCurveTo(p.r,-p.r,p.r*2,p.r,p.r*0.2,p.r*2);
+    ctx.bezierCurveTo(-p.r*2,p.r,-p.r,-p.r,0,0);
+    ctx.fillStyle = p.color;
     ctx.fill();
     ctx.restore();
 }
 
-function centro(x,y,r){
+function dibujarCentro(x,y,r){
     ctx.beginPath();
     ctx.arc(x,y,r,0,Math.PI*2);
     ctx.fillStyle="#5C4033";
     ctx.fill();
+}
 
-    for(let i=0;i<120;i++){
-        let ang = Math.random()*Math.PI*2;
-        let dist = Math.random()*r;
-        let px = x + Math.cos(ang)*dist;
-        let py = y + Math.sin(ang)*dist;
-        ctx.beginPath();
-        ctx.arc(px,py,2,0,Math.PI*2);
-        ctx.fillStyle="#3B2F2F";
-        ctx.fill();
+crearPetalos(canvas.width/2, canvas.height/2, 1);
+
+let indice = 0;
+
+function animar(){
+    if(indice < petalos.length){
+        dibujarPetalo(petalos[indice]);
+        indice++;
+        requestAnimationFrame(animar);
+    }else if(!centroListo){
+        dibujarCentro(canvas.width/2, canvas.height/2, 45);
+        centroListo = true;
     }
 }
 
-function girasol(x,y,scale){
-    const colores=["#FFD84D","#FFC300","#FFDB58","#F4C430"];
-    for(let i=0;i<40;i++){
-        let ang = i*(Math.PI*2/40);
-        petalo(x,y,60*scale,ang,colores[Math.floor(Math.random()*colores.length)]);
-    }
-    centro(x,y,45*scale);
-}
-
-function hoja(x,y,size,angle){
-    ctx.save();
-    ctx.translate(x,y);
-    ctx.rotate(angle);
-    ctx.beginPath();
-    ctx.ellipse(0,0,size,size/2,0,0,Math.PI*2);
-    ctx.fillStyle="#3B6B35";
-    ctx.fill();
-    ctx.restore();
-}
-
-function dibujar(){
-    // Hojas atrás
-    hoja(canvas.width/2-200,canvas.height/2,150,2.5);
-    hoja(canvas.width/2+200,canvas.height/2,150,-2.5);
-    hoja(canvas.width/2-80,canvas.height/2+200,170,2.8);
-    hoja(canvas.width/2+80,canvas.height/2+200,170,-2.8);
-
-    // Girasoles encima
-    girasol(canvas.width/2-120,canvas.height/2,1);
-    girasol(canvas.width/2+120,canvas.height/2-40,1.1);
-    girasol(canvas.width/2,canvas.height/2+120,1.05);
-}
-
-dibujar();
+animar();
 </script>
 
 </body>
